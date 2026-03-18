@@ -1,13 +1,13 @@
 import streamlit as st
 import pickle
 import re
-import os
-import nltk
+import numpy as np
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
+import nltk
 
 # -----------------------------
-# NLTK setup
+# NLTK setup (run once)
 # -----------------------------
 nltk.download('stopwords')
 nltk.download('wordnet')
@@ -16,15 +16,10 @@ stop_words = set(stopwords.words('english'))
 lemmatizer = WordNetLemmatizer()
 
 # -----------------------------
-# Load Model & Vectorizer (SAFE PATH)
+# Load Model & Vectorizer
 # -----------------------------
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-model_path = os.path.join(BASE_DIR, "..", "sentiment_model.pkl")
-vectorizer_path = os.path.join(BASE_DIR, "..", "tfidf_vectorizer.pkl")
-
-model = pickle.load(open(model_path, 'rb'))
-vectorizer = pickle.load(open(vectorizer_path, 'rb'))
+model = pickle.load(open('sentiment_model.pkl', 'rb'))
+vectorizer = pickle.load(open('tfidf_vectorizer.pkl', 'rb'))
 
 # -----------------------------
 # Text Cleaning Function
@@ -40,24 +35,74 @@ def clean_text(text):
 # -----------------------------
 # Streamlit UI
 # -----------------------------
-st.set_page_config(page_title="Sentiment Analysis System", layout="centered")
+st.set_page_config(page_title="Advanced Sentiment Analysis", layout="centered")
 
-st.title("💬 Sentiment Analysis System")
-st.write("Type a sentence and get sentiment prediction instantly!")
+st.title("💬 Advanced Sentiment Analysis System")
+st.markdown("Analyze sentiment with confidence scores, breakdown, and insights 🚀")
 
-user_input = st.text_area("Enter your text:")
+# Input
+user_input = st.text_area("✍️ Enter your text here:")
 
-if st.button("Predict"):
+# Sample text buttons
+col1, col2, col3 = st.columns(3)
+if col1.button("😊 Positive Example"):
+    user_input = "This product is amazing and I love it!"
+if col2.button("😡 Negative Example"):
+    user_input = "This is the worst experience ever."
+if col3.button("😐 Neutral Example"):
+    user_input = "The product is okay, not too bad."
+
+# Predict
+if st.button("🔍 Analyze Sentiment"):
     if user_input.strip() == "":
-        st.warning("Please enter some text.")
+        st.warning("⚠️ Please enter some text.")
     else:
-        cleaned_input = clean_text(user_input)
-        vectorized_input = vectorizer.transform([cleaned_input])
-        prediction = model.predict(vectorized_input)[0]
+        with st.spinner("Analyzing..."):
+            cleaned_input = clean_text(user_input)
+            vectorized_input = vectorizer.transform([cleaned_input])
 
-        if prediction.lower() == "positive":
-            st.success(f"😊 Sentiment: {prediction.capitalize()}")
-        elif prediction.lower() == "negative":
-            st.error(f"😠 Sentiment: {prediction.capitalize()}")
+            prediction = model.predict(vectorized_input)[0]
+
+            # Probability (if model supports it)
+            try:
+                proba = model.predict_proba(vectorized_input)[0]
+                confidence = np.max(proba) * 100
+            except:
+                proba = None
+                confidence = None
+
+        # -----------------------------
+        # Result Display
+        # -----------------------------
+        st.subheader("📊 Result")
+
+        if prediction == "positive":
+            st.success("😊 Positive Sentiment")
+        elif prediction == "negative":
+            st.error("😡 Negative Sentiment")
         else:
-            st.info(f"😐 Sentiment: {prediction.capitalize()}")
+            st.warning("😐 Neutral Sentiment")
+
+        # Confidence score
+        if confidence:
+            st.write(f"**Confidence Score:** {confidence:.2f}%")
+
+        # Detailed breakdown
+        if proba is not None:
+            st.subheader("📈 Sentiment Breakdown")
+            labels = model.classes_
+            breakdown = {labels[i]: float(proba[i]) for i in range(len(labels))}
+            st.bar_chart(breakdown)
+
+        # Keywords
+        st.subheader("🔑 Important Words")
+        keywords = cleaned_input.split()[:10]
+        st.write(", ".join(keywords))
+
+        # Cleaned text (for learning/debug)
+        with st.expander("🧹 Cleaned Text"):
+            st.write(cleaned_input)
+
+# Footer
+st.markdown("---")
+st.markdown("🚀 Built with Streamlit | Advanced NLP Project")

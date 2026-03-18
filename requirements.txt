@@ -1,5 +1,5 @@
-pandas
-nltk
-scikit-learn
 streamlit
-datasets
+numpy
+pandas
+scikit-learn
+nltk
