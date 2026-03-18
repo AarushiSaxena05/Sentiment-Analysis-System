@@ -1,18 +1,27 @@
-# Sentiment Analysis System
+# 🎯 Sentiment Analysis System
 
-A Python-based NLP project that predicts sentiment (positive, neutral, negative) from text reviews.
+## 📌 Overview
+This project is a Machine Learning-based Sentiment Analysis System that classifies text into **Positive, Negative, or Neutral** sentiments.
 
-## Features
-- Text preprocessing with NLTK
-- TF-IDF vectorization
-- Naive Bayes classification
-- Test custom sentences interactively
-- Ready for deployment with Streamlit
+It uses Natural Language Processing (NLP) techniques and a Naive Bayes classifier to analyze user input in real-time.
 
-## Tech Stack
-- Python 3
-- pandas, nltk, scikit-learn
-- Streamlit (optional)
+---
 
-## How to Run
-1. Clone the repo:
+## 🚀 Features
+- Text preprocessing (cleaning, stopword removal)
+- TF-IDF feature extraction
+- Machine Learning model (Naive Bayes)
+- Real-time sentiment prediction
+- Beginner-friendly and easy to understand
+
+---
+
+## 🛠️ Tech Stack
+- Python
+- Pandas
+- NLTK
+- Scikit-learn
+
+---
+
+## 📂 Project Structure
