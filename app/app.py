@@ -1,25 +1,33 @@
 import streamlit as st
 import pickle
 import re
+import os
+import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
-import nltk
 
 # -----------------------------
-# Step 1: NLTK setup
+# NLTK setup
 # -----------------------------
 nltk.download('stopwords')
+nltk.download('wordnet')
+
 stop_words = set(stopwords.words('english'))
 lemmatizer = WordNetLemmatizer()
 
 # -----------------------------
-# Step 2: Load Model & Vectorizer
+# Load Model & Vectorizer (SAFE PATH)
 # -----------------------------
-model = pickle.load(open('../sentiment_model.pkl', 'rb'))
-vectorizer = pickle.load(open('../tfidf_vectorizer.pkl', 'rb'))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model_path = os.path.join(BASE_DIR, "..", "sentiment_model.pkl")
+vectorizer_path = os.path.join(BASE_DIR, "..", "tfidf_vectorizer.pkl")
+
+model = pickle.load(open(model_path, 'rb'))
+vectorizer = pickle.load(open(vectorizer_path, 'rb'))
 
 # -----------------------------
-# Step 3: Text Cleaning Function
+# Text Cleaning Function
 # -----------------------------
 def clean_text(text):
     text = re.sub(r"http\S+|www\S+|https\S+", '', str(text))
@@ -30,21 +38,26 @@ def clean_text(text):
     return " ".join(words)
 
 # -----------------------------
-# Step 4: Streamlit UI
+# Streamlit UI
 # -----------------------------
-st.set_page_config(page_title="Sentiment Analysis System", layout="wide")
+st.set_page_config(page_title="Sentiment Analysis System", layout="centered")
+
 st.title("💬 Sentiment Analysis System")
-st.markdown("Enter any sentence or review, and the AI will predict its sentiment (positive, neutral, negative).")
+st.write("Type a sentence and get sentiment prediction instantly!")
 
-# User input
-user_input = st.text_area("Enter your text here:")
+user_input = st.text_area("Enter your text:")
 
-if st.button("Predict Sentiment"):
+if st.button("Predict"):
     if user_input.strip() == "":
         st.warning("Please enter some text.")
     else:
         cleaned_input = clean_text(user_input)
         vectorized_input = vectorizer.transform([cleaned_input])
         prediction = model.predict(vectorized_input)[0]
-        st.success(f"Predicted Sentiment: **{prediction.capitalize()}**")
-        
+
+        if prediction.lower() == "positive":
+            st.success(f"😊 Sentiment: {prediction.capitalize()}")
+        elif prediction.lower() == "negative":
+            st.error(f"😠 Sentiment: {prediction.capitalize()}")
+        else:
+            st.info(f"😐 Sentiment: {prediction.capitalize()}")
