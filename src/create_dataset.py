@@ -36,5 +36,9 @@ data = {
 df = pd.DataFrame(data)
 
 # Save CSV in the data folder
-df.to_csv("../data/dataset.csv", index=False)
+import os
+
+os.makedirs("data", exist_ok=True)   # create folder if not exists
+df.to_csv("data/dataset.csv", index=False)
+
 print("dataset.csv created successfully in the data folder!")
